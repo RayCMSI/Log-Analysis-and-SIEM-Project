@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Mini SIEM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body{font-family:system-ui;margin:24px}
+      table{border-collapse:collapse}
+      td,th{border:1px solid #b00e0e;padding:6px}
+    </style>
+  </head>
+  <body>
+    <h1>Recent Alerts</h1>
+    <table>
+      <tr><th>Time</th><th>Rule</th><th>Severity</th><th>Entity</th><th>Summary</th></tr>
+      {% for a in alerts %}
+      <tr>
+        <td>{{ a[0] }}</td><td>{{ a[1] }}</td><td>{{ a[2] }}</td><td>{{ a[3] }}</td><td>{{ a[4] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <h2>Top IPs</h2>
+    <canvas id="topIps"></canvas>
+
+    <!-- Put Jinja-rendered data in JSON blocks (linters ignore this) -->
+    <script id="labels-data" type="application/json">{{ labels | tojson }}</script>
+    <script id="counts-data" type="application/json">{{ counts | tojson }}</script>
+
+    <script>
+      (function () {
+        const chartLabels = JSON.parse(document.getElementById('labels-data').textContent);
+        const chartData   = JSON.parse(document.getElementById('counts-data').textContent);
+
+        const ctx = document.getElementById('topIps');
+        new Chart(ctx, {
+          type: 'bar',
+          data: { labels: chartLabels, datasets: [{ label: 'Log count', data: chartData }] },
+          options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+      })();
+    </script>
+  </body>
+</html>
