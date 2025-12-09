@@ -1,0 +1,53 @@
+#--ingests a new log from our different samples
+python -m src.ingest data/apache.log
+
+#--shows the count of our total count of login attempts
+sqlite3 data/db.sqlite3 "SELECT COUNT(*) FROM logs;"
+
+#--shows what our tables looks like in SQL database language
+sqlite3 data/db.sqlite3 ".schema logs"
+sqlite3 data/db.sqlite3 ".schema alerts"
+
+
+#-- shows us the detials of the sample logins
+sqlite3 data/db.sqlite3 \
+  "SELECT ts, source, ip, user, action, result
+   FROM logs
+   ORDER BY ts DESC
+   LIMIT 10;"
+
+
+#-- shows us the detials of the sample logins
+sqlite3 data/db.sqlite3 \
+  "SELECT ts, ip, action, result
+   FROM logs
+   WHERE source = 'apache'
+   ORDER BY ts DESC
+   LIMIT 10;"
+
+#-- shows us the detials of the sample logins (but need to reingest to work correctly)
+sqlite3 data/db.sqlite3 \
+  "SELECT ts, ip, user, action, result
+   FROM logs
+   WHERE source = 'auth'
+   ORDER BY ts DESC
+   LIMIT 10;"
+
+
+
+#shows all of the different number of logs 
+sqlite3 data/db.sqlite3 \
+  "SELECT ip, COUNT(*) AS cnt
+   FROM logs
+   GROUP BY ip
+   ORDER BY cnt DESC
+   LIMIT 10;"
+
+
+#-- shows the total number of successful logins and then the total number of failed logins
+sqlite3 data/db.sqlite3 \
+  "SELECT substr(ts,1,16) AS minute, COUNT(*) AS events
+   FROM logs
+   GROUP BY minute
+   ORDER BY minute DESC
+   LIMIT 10;"
